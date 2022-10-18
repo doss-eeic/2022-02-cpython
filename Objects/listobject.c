@@ -3076,6 +3076,36 @@ list_subscript(PyListObject* self, PyObject* item)
             i += PyList_GET_SIZE(self);
         return list_item(self, i);
     }
+    else if (PyTuple_Check(item)) {
+        Py_ssize_t len;
+        len = PyTuple_GET_SIZE(item);
+        if (len > 1) {
+            PyObject *i;
+            i = PyTuple_GET_ITEM(item, 0);
+            if (_PyIndex_Check(i)) {
+                PyObject *newlist;
+                newlist = list_subscript(self, i);
+                if (newlist) {
+                    return list_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len));
+                }
+                else {
+                    return newlist;
+                }
+            }
+            else {
+                PyErr_Format(PyExc_TypeError,
+                             "list index must be an integer",
+                             Py_TYPE(i)->tp_name);
+                return NULL;
+            }
+        }
+        else if (len == 0 && PyErr_Occurred()) {
+            return NULL;
+        }
+        else {
+            return list_subscript(self, PyTuple_GET_ITEM(item, 0));
+        }
+    }
     else if (PySlice_Check(item)) {
         Py_ssize_t start, stop, step, slicelength, i;
         size_t cur;
