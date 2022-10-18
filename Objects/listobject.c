@@ -854,32 +854,37 @@ list_append(PyListObject *self, PyObject *object)
     Py_RETURN_NONE;
 }
 
+/*[clinic input]
+list.map
 
+     func: object
+     /
+
+Apply func for each elements in the list.
+[clinic start generated code]*/
 
 static PyObject* 
-list_map_impl(PyListObject *self, PyObject *keyfunc){
+list_map_impl(PyListObject *self, PyObject *func){
     PyListObject *result;
     PyObject **src, **dest;
     Py_ssize_t i, len;
     len = Py_SIZE(self);
     result = (PyListObject *) list_new_prealloc(len);
-    if (result ==NULL){
+    if (result == NULL){
         return NULL;
     }
     src = self->ob_item;
     dest = result->ob_item;
-    if (!PyCallable_Check(keyfunc)){
+    if (!PyCallable_Check(func)){
         return Py_None;
     }
+    PyObject *v;
     for (i = 0 ; i< len; i++){
-        PyObject *v = PyObject_CallOneArg(keyfunc,src[i]);
-        Py_INCREF(v);
+        v = PyObject_CallOneArg(func, src[i]);
         dest[i] = v;
     }
     Py_SET_SIZE(result,len);
-    // for (int i = 0 ; i < n; i++){
-    //     result[i] = PyObject_CallOneArg(keyfunc, saved_ob_item[i]);
-    // }
+    
     return (PyObject *)result;
 }
 
