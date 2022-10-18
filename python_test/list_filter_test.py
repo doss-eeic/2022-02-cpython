@@ -6,7 +6,7 @@ class Product:
         self.price = price
 
 
-class ListMapTest(unittest.TestCase):
+class ListFilterTest(unittest.TestCase):
     
     def test_small_int_list(self):
         ls = [1, 4, 5]
