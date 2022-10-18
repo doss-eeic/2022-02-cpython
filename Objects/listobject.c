@@ -854,6 +854,35 @@ list_append(PyListObject *self, PyObject *object)
     Py_RETURN_NONE;
 }
 
+
+
+static PyObject* 
+list_map_impl(PyListObject *self, PyObject *keyfunc){
+    PyListObject *result;
+    PyObject **src, **dest;
+    Py_ssize_t i, len;
+    len = Py_SIZE(self);
+    result = (PyListObject *) list_new_prealloc(len);
+    if (result ==NULL){
+        return NULL;
+    }
+    src = self->ob_item;
+    dest = result->ob_item;
+    if (!PyCallable_Check(keyfunc)){
+        return Py_None;
+    }
+    for (i = 0 ; i< len; i++){
+        PyObject *v = PyObject_CallOneArg(keyfunc,src[i]);
+        Py_INCREF(v);
+        dest[i] = v;
+    }
+    Py_SET_SIZE(result,len);
+    // for (int i = 0 ; i < n; i++){
+    //     result[i] = PyObject_CallOneArg(keyfunc, saved_ob_item[i]);
+    // }
+    return (PyObject *)result;
+}
+
 /*[clinic input]
 list.sum
 
@@ -3007,6 +3036,7 @@ static PyMethodDef list_methods[] = {
     LIST_REMOVE_METHODDEF
     LIST_INDEX_METHODDEF
     LIST_COUNT_METHODDEF
+    LIST_MAP_METHODDEF
     LIST_REVERSE_METHODDEF
     LIST_SORT_METHODDEF
     LIST_SUM_METHODDEF
