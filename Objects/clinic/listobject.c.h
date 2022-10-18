@@ -111,11 +111,29 @@ PyDoc_STRVAR(list_map__doc__,
     {"map", (PyCFunction)list_map, METH_O, list_map__doc__},
 
 static PyObject *
-list_map_impl(PyListObject *self, PyObject *keyfunc);
+list_map_impl(PyListObject *self, PyObject *func);
 
 static PyObject*
 list_map(PyListObject *self, PyObject *args){
     return list_map_impl(self,args);
+}
+
+PyDoc_STRVAR(list_filter__doc__,
+"filter($self, callable function)\n"
+"---\n"
+"\n"
+"attach function to each list element"
+);
+
+#define LIST_FILTER_METHODDEF \
+    {"filter", (PyCFunction)list_filter, METH_O, list_filter__doc__},
+
+static PyObject *
+list_filter_impl(PyListObject *self, PyObject *func);
+
+static PyObject*
+list_filter(PyListObject *self, PyObject *args){
+    return list_filter_impl(self,args);
 }
 
 #define LIST_SUM_METHODDEF \

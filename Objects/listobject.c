@@ -884,7 +884,51 @@ list_map_impl(PyListObject *self, PyObject *func){
         dest[i] = v;
     }
     Py_SET_SIZE(result,len);
-    
+
+    return (PyObject *)result;
+}
+
+/*[clinic input]
+list.filter
+
+     func: object
+     /
+
+Apply func for each elements in the list.
+[clinic start generated code]*/
+
+static PyObject *
+list_filter_impl(PyListObject *self, PyObject *cond)
+{
+    PyListObject *result;
+    PyObject **src, **dest;
+    Py_ssize_t i, len;
+    len = Py_SIZE(self);
+    result = (PyListObject *)PyList_New(0);
+    if (result == NULL)
+    {
+        return NULL;
+    }
+    src = self->ob_item;
+    // dest = result->ob_item;
+    if (!PyCallable_Check(cond))
+    {
+        return Py_None;
+    }
+    PyObject *v;
+    int reslen = 0;
+    for (i = 0; i < len; i++)
+    {
+        v = PyObject_CallOneArg(cond, src[i]);
+        if (v == Py_True) {
+            // condition satisfied
+            PyList_Append(result, src[i]);
+            reslen++;
+        }
+        // dest[i] = v;
+    }
+    Py_SET_SIZE(result, reslen);
+
     return (PyObject *)result;
 }
 
@@ -3042,6 +3086,7 @@ static PyMethodDef list_methods[] = {
     LIST_INDEX_METHODDEF
     LIST_COUNT_METHODDEF
     LIST_MAP_METHODDEF
+    LIST_FILTER_METHODDEF
     LIST_REVERSE_METHODDEF
     LIST_SORT_METHODDEF
     LIST_SUM_METHODDEF
