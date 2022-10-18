@@ -11,6 +11,7 @@ class ListMapTest(unittest.TestCase):
     def test_small_int_list(self):
         ls = [1, 4, 5]
         self.assertEqual(ls.filter(lambda x: x>2), [4, 5])
+        self.assertEqual(len(ls.filter(lambda x: x>2)), 2)
     
     def test_small_float_list(self):
         ls = [1.2, 3.4, 5.6]
