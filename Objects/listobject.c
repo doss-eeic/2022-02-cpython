@@ -2880,19 +2880,27 @@ list_subscript(PyListObject* self, PyObject* item)
         if (len > 1) {
             PyObject *i;
             i = PyTuple_GET_ITEM(item, 0);
-            if (_PyIndex_Check(i)) {
+            if (_PyIndex_Check(i) || PySlice_Check(i)) {
                 PyObject *newlist;
                 newlist = list_subscript(self, i);
                 if (newlist) {
-                    return list_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len));
+                    if (PyList_Check(newlist)) {
+                        return list_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len));
+                    }
+                    else {
+                        PyErr_Format(PyExc_TypeError,
+                                     "'%.200s' object is not a list object",
+                                     Py_TYPE(newlist)->tp_name);
+                        return NULL;
+                    }
                 }
                 else {
-                    return newlist;
+                    return NULL;
                 }
             }
             else {
                 PyErr_Format(PyExc_TypeError,
-                             "list index must be an integer",
+                             "list indices must be integers or slices, not %.200s",
                              Py_TYPE(i)->tp_name);
                 return NULL;
             }
