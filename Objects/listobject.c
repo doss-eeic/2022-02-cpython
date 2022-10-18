@@ -854,24 +854,7 @@ list_append(PyListObject *self, PyObject *object)
     Py_RETURN_NONE;
 }
 
-// static PyObject *
-// list_map(PyListObject *self, PyObject *object)
-// /*[clinic end generated code: output=7c096003a29c0eae input=43a3fe48a7066e91]*/
-// {   
-//     Py_ssize_t i,n = Py_SIZE(self);
-//     PyObject **items;
-//     items = self->ob_item;
-//     if (PyUnicode_Check(object)){
-//         printf("cannot\n");
-//         Py_RETURN_NONE;
-//     }
-//     for (i = n; --i >= 0; ){
-//         if (PyNumber_Check(items[i])){
-//             items[i] = PyNumber_Add(items[i],object);
-//         }
-//     }
-//     Py_RETURN_NONE;
-// }
+
 
 static PyObject* 
 list_map_impl(PyListObject *self, PyObject *keyfunc){
