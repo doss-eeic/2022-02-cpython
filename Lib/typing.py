@@ -1842,6 +1842,7 @@ class Generic:
                             p.__default__
                         )
                     params += tuple(default_params)
+                # assertion
                 _check_generic(cls, params, len(cls.__parameters__))
         return _GenericAlias(cls, params,
                              _paramspec_tvars=True)
