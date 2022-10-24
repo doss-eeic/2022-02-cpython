@@ -23,6 +23,15 @@ class ListSubscriptTest(unittest.TestCase):
         ]
         self.assertEqual(ls[2:3, -1, ::-1, 1::2], [11, 9])
 
+    def test_assign(self):
+        ls = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]
+        ls[1, 2] = 60
+        self.assertEqual(ls[1, 2], 60)
+
 
 if __name__ == '__main__':
     unittest.main()

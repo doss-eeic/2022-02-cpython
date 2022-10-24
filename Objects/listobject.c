@@ -3213,6 +3213,44 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
             i += PyList_GET_SIZE(self);
         return list_ass_item(self, i, value);
     }
+    else if (PyTuple_Check(item)) {
+        Py_ssize_t len;
+        len = PyTuple_GET_SIZE(item);
+        if (len > 1) {
+            PyObject *i;
+            i = PyTuple_GET_ITEM(item, 0);
+            if (_PyIndex_Check(i) || PySlice_Check(i)) {
+                PyObject *newlist;
+                newlist = list_subscript(self, i);
+                if (newlist) {
+                    if (PyList_Check(newlist)) {
+                        return list_ass_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len), value);
+                    }
+                    else {
+                        PyErr_Format(PyExc_TypeError,
+                                     "'%.200s' object is not a list object",
+                                     Py_TYPE(newlist)->tp_name);
+                        return -1;
+                    }
+                }
+                else {
+                    return -1;
+                }
+            }
+            else {
+                PyErr_Format(PyExc_TypeError,
+                             "list indices must be integers or slices, not %.200s",
+                             Py_TYPE(i)->tp_name);
+                return -1;
+            }
+        }
+        else if (len == 0 && PyErr_Occurred()) {
+            return -1;
+        }
+        else {
+            return list_ass_subscript(self, PyTuple_GET_ITEM(item, 0), value);
+        }
+    }
     else if (PySlice_Check(item)) {
         Py_ssize_t start, stop, step, slicelength;
 
