@@ -1009,8 +1009,9 @@ class TypeVar(_Final, _Immutable, _BoundVarianceMixin, _PickleUsingNameMixin,
     """
 
     def __init__(self, name, *constraints, bound=None,
-                 covariant=False, contravariant=False):
+                 covariant=False, contravariant=False, default=None):
         self.__name__ = name
+        self.__default__ = default
         super().__init__(bound, covariant, contravariant)
         if constraints and bound is not None:
             raise TypeError("Constraints cannot be combined with bound=...")
@@ -1829,6 +1830,19 @@ class Generic:
                 # We only run this if there are no TypeVarTuples, because we
                 # don't check variadic generic arity at runtime (to reduce
                 # complexity of typing.py).
+                actual_len = len(params)
+                defined_len = len(cls.__parameters__)
+                if actual_len < defined_len:
+                    # shortage of TypeVar specification occured
+                    # then uses default value
+                    default_params = []
+                    for idx in range(actual_len, defined_len):
+                        p = cls.__parameters__[idx]
+                        default_params.append(
+                            p.__default__
+                        )
+                    params += tuple(default_params)
+                # assertion
                 _check_generic(cls, params, len(cls.__parameters__))
         return _GenericAlias(cls, params,
                              _paramspec_tvars=True)
