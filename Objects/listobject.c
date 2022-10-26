@@ -3127,18 +3127,48 @@ list_subscript(PyListObject* self, PyObject* item)
         if (len > 1) {
             PyObject *i;
             i = PyTuple_GET_ITEM(item, 0);
-            if (_PyIndex_Check(i) || PySlice_Check(i)) {
+            if (_PyIndex_Check(i)) {
+                Py_ssize_t j;
                 PyObject *newlist;
-                newlist = list_subscript(self, i);
+                j = PyNumber_AsSsize_t(i, PyExc_IndexError);
+                if (j == -1 && PyErr_Occurred())
+                    return NULL;
+                if (j < 0)
+                    j += PyList_GET_SIZE(self);
+                newlist = list_item(self, j);
                 if (newlist) {
                     if (PyList_Check(newlist)) {
-                        return list_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len));
+                        if (len > 2) {
+                            return list_subscript(_PyList_CAST(newlist),
+                                                  PyTuple_GetSlice(item, 1, len));
+                        }
+                        else {
+                            return list_subscript(_PyList_CAST(newlist),
+                                                  PyTuple_GET_ITEM(item, 1));
+                        }
                     }
                     else {
                         PyErr_Format(PyExc_TypeError,
                                      "'%.200s' object is not a list object",
                                      Py_TYPE(newlist)->tp_name);
                         return NULL;
+                    }
+                }
+                else {
+                    return NULL;
+                }
+            }
+            else if (PySlice_Check(i)) {
+                PyObject *slicedlist;
+                slicedlist = list_subscript(self, i);
+                if (slicedlist) {
+                    if (len > 2) {
+                        return list_subscript(_PyList_CAST(slicedlist),
+                                              PyTuple_GetSlice(item, 1, len));
+                    }
+                    else {
+                        return list_subscript(_PyList_CAST(slicedlist),
+                                              PyTuple_GET_ITEM(item, 1));
                     }
                 }
                 else {
@@ -3156,7 +3186,8 @@ list_subscript(PyListObject* self, PyObject* item)
             return NULL;
         }
         else {
-            return list_subscript(self, PyTuple_GET_ITEM(item, 0));
+            return list_subscript(self,
+                                  PyTuple_GET_ITEM(item, 0));
         }
     }
     else if (PySlice_Check(item)) {
@@ -3219,18 +3250,52 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
         if (len > 1) {
             PyObject *i;
             i = PyTuple_GET_ITEM(item, 0);
-            if (_PyIndex_Check(i) || PySlice_Check(i)) {
+            if (_PyIndex_Check(i)) {
+                Py_ssize_t j;
                 PyObject *newlist;
-                newlist = list_subscript(self, i);
+                j = PyNumber_AsSsize_t(i, PyExc_IndexError);
+                if (j == -1 && PyErr_Occurred())
+                    return -1;
+                if (i < 0)
+                    j += PyList_GET_SIZE(self);
+                newlist = list_item(self, j);
                 if (newlist) {
                     if (PyList_Check(newlist)) {
-                        return list_ass_subscript(_PyList_CAST(newlist), PyTuple_GetSlice(item, 1, len), value);
+                        if (len > 2) {
+                            return list_ass_subscript(_PyList_CAST(newlist),
+                                                      PyTuple_GetSlice(item, 1, len),
+                                                      value);
+                        }
+                        else {
+                            return list_ass_subscript(_PyList_CAST(newlist),
+                                                      PyTuple_GET_ITEM(item, 1),
+                                                      value);
+                        }
                     }
                     else {
                         PyErr_Format(PyExc_TypeError,
                                      "'%.200s' object is not a list object",
                                      Py_TYPE(newlist)->tp_name);
                         return -1;
+                    }
+                }
+                else {
+                    return -1;
+                }
+            }
+            else if (PySlice_Check(i)) {
+                PyObject *slicedlist;
+                slicedlist = list_subscript(self, i);
+                if (slicedlist) {
+                    if (len > 2) {
+                        return list_ass_subscript(_PyList_CAST(slicedlist),
+                                                  PyTuple_GetSlice(item, 1, len),
+                                                  value);
+                    }
+                    else {
+                        return list_ass_subscript(_PyList_CAST(slicedlist),
+                                                  PyTuple_GET_ITEM(item, 1),
+                                                  value);
                     }
                 }
                 else {
@@ -3248,7 +3313,9 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
             return -1;
         }
         else {
-            return list_ass_subscript(self, PyTuple_GET_ITEM(item, 0), value);
+            return list_ass_subscript(self,
+                                      PyTuple_GET_ITEM(item, 0),
+                                      value);
         }
     }
     else if (PySlice_Check(item)) {
