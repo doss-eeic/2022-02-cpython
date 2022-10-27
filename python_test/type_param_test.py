@@ -2,7 +2,7 @@ from typing import TypeVar, Generic
 
 
 # Scenario 1
-A = TypeVar("A", default=int)
+A = TypeVar("A")
 B = TypeVar("B", default=str)
 C = TypeVar("C", default=float)
 class Product(Generic[A, B, C]):
