@@ -3122,49 +3122,39 @@ list_subscript(PyListObject* self, PyObject* item)
         return list_item(self, i);
     }
     else if (PyTuple_Check(item)) {
-        Py_ssize_t len = PyTuple_GET_SIZE(item);
-        if (len > 1) {
+        Py_ssize_t d, len;
+        PyListObject *newlist;
+
+        len = PyTuple_GET_SIZE(item);
+        newlist = self;
+        for (d = 0; d < len - 1; d++) {
             PyObject *i;
-            i = PyTuple_GET_ITEM(item, 0);
+            i = PyTuple_GET_ITEM(item, d);
             if (_PyIndex_Check(i)) {
                 Py_ssize_t j;
-                PyObject *newlist;
+                PyObject *newobj;
 
                 j = PyNumber_AsSsize_t(i, PyExc_IndexError);
                 if (j == -1 && PyErr_Occurred())
                     return NULL;
                 if (j < 0)
                     j += PyList_GET_SIZE(self);
-                newlist = list_item(self, j);
+                newobj = list_item(newlist, j);
 
-                if (PyList_Check(newlist)) {
-                    if (len > 2) {
-                        return list_subscript(_PyList_CAST(newlist),
-                                              PyTuple_GetSlice(item, 1, len));
-                    }
-                    else {
-                        return list_subscript(_PyList_CAST(newlist),
-                                              PyTuple_GET_ITEM(item, 1));
-                    }
+                if (PyList_Check(newobj)) {
+                    newlist = _PyList_CAST(newobj);
                 }
                 else {
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
-                                 Py_TYPE(newlist)->tp_name);
+                                 Py_TYPE(newobj)->tp_name);
                     return NULL;
                 }
             }
             else if (PySlice_Check(i)) {
                 PyObject *slicedlist = list_subscript(self, i);
                 if (slicedlist) {
-                    if (len > 2) {
-                        return list_subscript(_PyList_CAST(slicedlist),
-                                              PyTuple_GetSlice(item, 1, len));
-                    }
-                    else {
-                        return list_subscript(_PyList_CAST(slicedlist),
-                                              PyTuple_GET_ITEM(item, 1));
-                    }
+                    newlist = _PyList_CAST(slicedlist);
                 }
                 else {
                     return NULL;
@@ -3177,12 +3167,11 @@ list_subscript(PyListObject* self, PyObject* item)
                 return NULL;
             }
         }
-        else if (len == 0 && PyErr_Occurred()) {
+        if (len == 0 && PyErr_Occurred()) {
             return NULL;
         }
         else {
-            return list_subscript(self,
-                                  PyTuple_GET_ITEM(item, 0));
+            return list_subscript(newlist, PyTuple_GET_ITEM(item, d));
         }
     }
     else if (PySlice_Check(item)) {
@@ -3240,53 +3229,39 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
         return list_ass_item(self, i, value);
     }
     else if (PyTuple_Check(item)) {
-        Py_ssize_t len = PyTuple_GET_SIZE(item);
-        if (len > 1) {
+        Py_ssize_t d, len;
+        PyListObject *newlist;
+
+        len = PyTuple_GET_SIZE(item);
+        newlist = self;
+        for (d = 0; d < len - 1; d++) {
             PyObject *i;
-            i = PyTuple_GET_ITEM(item, 0);
+            i = PyTuple_GET_ITEM(item, d);
             if (_PyIndex_Check(i)) {
                 Py_ssize_t j;
-                PyObject *newlist;
+                PyObject *newobj;
 
                 j = PyNumber_AsSsize_t(i, PyExc_IndexError);
                 if (j == -1 && PyErr_Occurred())
                     return -1;
-                if (i < 0)
+                if (j < 0)
                     j += PyList_GET_SIZE(self);
-                newlist = list_item(self, j);
+                newobj = list_item(newlist, j);
 
-                if (PyList_Check(newlist)) {
-                    if (len > 2) {
-                        return list_ass_subscript(_PyList_CAST(newlist),
-                                                  PyTuple_GetSlice(item, 1, len),
-                                                  value);
-                    }
-                    else {
-                        return list_ass_subscript(_PyList_CAST(newlist),
-                                                  PyTuple_GET_ITEM(item, 1),
-                                                  value);
-                    }
+                if (PyList_Check(newobj)) {
+                    newlist = _PyList_CAST(newobj);
                 }
                 else {
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
-                                 Py_TYPE(newlist)->tp_name);
+                                 Py_TYPE(newobj)->tp_name);
                     return -1;
                 }
             }
             else if (PySlice_Check(i)) {
                 PyObject *slicedlist = list_subscript(self, i);
                 if (slicedlist) {
-                    if (len > 2) {
-                        return list_ass_subscript(_PyList_CAST(slicedlist),
-                                                  PyTuple_GetSlice(item, 1, len),
-                                                  value);
-                    }
-                    else {
-                        return list_ass_subscript(_PyList_CAST(slicedlist),
-                                                  PyTuple_GET_ITEM(item, 1),
-                                                  value);
-                    }
+                    newlist = _PyList_CAST(slicedlist);
                 }
                 else {
                     return -1;
@@ -3299,13 +3274,11 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
                 return -1;
             }
         }
-        else if (len == 0 && PyErr_Occurred()) {
+        if (len == 0 && PyErr_Occurred()) {
             return -1;
         }
         else {
-            return list_ass_subscript(self,
-                                      PyTuple_GET_ITEM(item, 0),
-                                      value);
+            return list_ass_subscript(newlist, PyTuple_GET_ITEM(item, d), value);
         }
     }
     else if (PySlice_Check(item)) {
