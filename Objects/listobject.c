@@ -3128,35 +3128,31 @@ list_subscript(PyListObject* self, PyObject* item)
         len = PyTuple_GET_SIZE(item);
         newlist = self;
         for (d = 0; d < len - 1; d++) {
-            PyObject *i;
+            PyObject *i, *newobject;
+
             i = PyTuple_GET_ITEM(item, d);
             if (_PyIndex_Check(i)) {
                 Py_ssize_t j;
-                PyObject *newobj;
-
                 j = PyNumber_AsSsize_t(i, PyExc_IndexError);
                 if (j == -1 && PyErr_Occurred())
                     return NULL;
                 if (j < 0)
-                    j += PyList_GET_SIZE(self);
-                newobj = list_item(newlist, j);
+                    j += PyList_GET_SIZE(newlist);
+                newobject = list_item(newlist, j);
 
-                if (PyList_Check(newobj)) {
-                    newlist = _PyList_CAST(newobj);
+                if (newobject == NULL) {
+                    return NULL;
                 }
-                else {
+                if (!PyList_Check(newobject)) {
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
-                                 Py_TYPE(newobj)->tp_name);
+                                 Py_TYPE(newobject)->tp_name);
                     return NULL;
                 }
             }
             else if (PySlice_Check(i)) {
-                PyObject *slicedlist = list_subscript(self, i);
-                if (slicedlist) {
-                    newlist = _PyList_CAST(slicedlist);
-                }
-                else {
+                newobject = list_subscript(self, i);
+                if (newobject == NULL) {
                     return NULL;
                 }
             }
@@ -3166,6 +3162,7 @@ list_subscript(PyListObject* self, PyObject* item)
                              Py_TYPE(i)->tp_name);
                 return NULL;
             }
+            newlist = _PyList_CAST(newobject);
         }
         if (len == 0 && PyErr_Occurred()) {
             return NULL;
@@ -3235,35 +3232,31 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
         len = PyTuple_GET_SIZE(item);
         newlist = self;
         for (d = 0; d < len - 1; d++) {
-            PyObject *i;
+            PyObject *i, *newobject;
+
             i = PyTuple_GET_ITEM(item, d);
             if (_PyIndex_Check(i)) {
                 Py_ssize_t j;
-                PyObject *newobj;
-
                 j = PyNumber_AsSsize_t(i, PyExc_IndexError);
                 if (j == -1 && PyErr_Occurred())
                     return -1;
                 if (j < 0)
-                    j += PyList_GET_SIZE(self);
-                newobj = list_item(newlist, j);
+                    j += PyList_GET_SIZE(newlist);
+                newobject = list_item(newlist, j);
 
-                if (PyList_Check(newobj)) {
-                    newlist = _PyList_CAST(newobj);
+                if (newobject == NULL) {
+                    return -1;
                 }
-                else {
+                if (!PyList_Check(newobject)) {
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
-                                 Py_TYPE(newobj)->tp_name);
+                                 Py_TYPE(newobject)->tp_name);
                     return -1;
                 }
             }
             else if (PySlice_Check(i)) {
-                PyObject *slicedlist = list_subscript(self, i);
-                if (slicedlist) {
-                    newlist = _PyList_CAST(slicedlist);
-                }
-                else {
+                newobject = list_subscript(self, i);
+                if (newobject == NULL) {
                     return -1;
                 }
             }
@@ -3273,6 +3266,7 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
                              Py_TYPE(i)->tp_name);
                 return -1;
             }
+            newlist = _PyList_CAST(newobject);
         }
         if (len == 0 && PyErr_Occurred()) {
             return -1;
