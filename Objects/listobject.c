@@ -3151,7 +3151,7 @@ list_subscript(PyListObject* self, PyObject* item)
                 }
             }
             else if (PySlice_Check(i)) {
-                newobject = list_subscript(self, i);
+                newobject = list_subscript(newlist, i);
                 if (newobject == NULL) {
                     return NULL;
                 }
@@ -3255,7 +3255,7 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
                 }
             }
             else if (PySlice_Check(i)) {
-                newobject = list_subscript(self, i);
+                newobject = list_subscript(newlist, i);
                 if (newobject == NULL) {
                     return -1;
                 }
