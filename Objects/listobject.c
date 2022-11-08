@@ -3131,15 +3131,8 @@ list_subscript(PyListObject* self, PyObject* item)
             PyObject *i, *newobject;
 
             i = PyTuple_GET_ITEM(item, d);
-            if (_PyIndex_Check(i)) {
-                Py_ssize_t j;
-                j = PyNumber_AsSsize_t(i, PyExc_IndexError);
-                if (j == -1 && PyErr_Occurred())
-                    return NULL;
-                if (j < 0)
-                    j += PyList_GET_SIZE(newlist);
-                newobject = list_item(newlist, j);
-
+            if (_PyIndex_Check(i) || PySlice_Check(i)) {
+                newobject = list_subscript(newlist, i);
                 if (newobject == NULL) {
                     return NULL;
                 }
@@ -3147,12 +3140,6 @@ list_subscript(PyListObject* self, PyObject* item)
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
                                  Py_TYPE(newobject)->tp_name);
-                    return NULL;
-                }
-            }
-            else if (PySlice_Check(i)) {
-                newobject = list_subscript(newlist, i);
-                if (newobject == NULL) {
                     return NULL;
                 }
             }
@@ -3235,15 +3222,8 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
             PyObject *i, *newobject;
 
             i = PyTuple_GET_ITEM(item, d);
-            if (_PyIndex_Check(i)) {
-                Py_ssize_t j;
-                j = PyNumber_AsSsize_t(i, PyExc_IndexError);
-                if (j == -1 && PyErr_Occurred())
-                    return -1;
-                if (j < 0)
-                    j += PyList_GET_SIZE(newlist);
-                newobject = list_item(newlist, j);
-
+            if (_PyIndex_Check(i) || PySlice_Check(i)) {
+                newobject = list_subscript(newlist, i);
                 if (newobject == NULL) {
                     return -1;
                 }
@@ -3251,12 +3231,6 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
                     PyErr_Format(PyExc_TypeError,
                                  "'%.200s' object is not a list object",
                                  Py_TYPE(newobject)->tp_name);
-                    return -1;
-                }
-            }
-            else if (PySlice_Check(i)) {
-                newobject = list_subscript(newlist, i);
-                if (newobject == NULL) {
                     return -1;
                 }
             }
