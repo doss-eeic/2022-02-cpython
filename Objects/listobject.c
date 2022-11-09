@@ -901,7 +901,7 @@ static PyObject *
 list_filter_impl(PyListObject *self, PyObject *cond)
 {
     PyListObject *result;
-    PyObject **src, **dest;
+    PyObject **src;
     Py_ssize_t i, len;
     len = Py_SIZE(self);
     result = (PyListObject *)PyList_New(0);
@@ -922,7 +922,7 @@ list_filter_impl(PyListObject *self, PyObject *cond)
         v = PyObject_CallOneArg(cond, src[i]);
         if (v == Py_True) {
             // condition satisfied
-            PyList_Append(result, src[i]);
+            PyList_Append((PyObject *)result, src[i]);
             reslen++;
         }
         // dest[i] = v;
@@ -990,7 +990,6 @@ list_max_impl(PyListObject *self)
         return NULL;
     }
     PyObject *result = NULL;
-    PyObject *temp = NULL;
     PyObject *item = NULL;
 
     for(;;) {
@@ -1044,7 +1043,6 @@ list_min_impl(PyListObject *self)
         return NULL;
     }
     PyObject *result = NULL;
-    PyObject *temp = NULL;
     PyObject *item = NULL;
 
     for (;;)
