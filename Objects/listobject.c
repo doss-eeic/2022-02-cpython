@@ -3131,22 +3131,14 @@ list_subscript(PyListObject* self, PyObject* item)
             PyObject *i, *newobject;
 
             i = PyTuple_GET_ITEM(item, d);
-            if (_PyIndex_Check(i) || PySlice_Check(i)) {
-                newobject = list_subscript(newlist, i);
-                if (newobject == NULL) {
-                    return NULL;
-                }
-                if (!PyList_Check(newobject)) {
-                    PyErr_Format(PyExc_TypeError,
-                                 "'%.200s' object is not a list object",
-                                 Py_TYPE(newobject)->tp_name);
-                    return NULL;
-                }
+            newobject = list_subscript(newlist, i);
+            if (newobject == NULL) {
+                return NULL;
             }
-            else {
+            if (!PyList_Check(newobject)) {
                 PyErr_Format(PyExc_TypeError,
-                             "list indices must be integers or slices, not %.200s",
-                             Py_TYPE(i)->tp_name);
+                             "'%.200s' object is not a list object",
+                             Py_TYPE(newobject)->tp_name);
                 return NULL;
             }
             newlist = _PyList_CAST(newobject);
@@ -3222,22 +3214,14 @@ list_ass_subscript(PyListObject* self, PyObject* item, PyObject* value)
             PyObject *i, *newobject;
 
             i = PyTuple_GET_ITEM(item, d);
-            if (_PyIndex_Check(i) || PySlice_Check(i)) {
-                newobject = list_subscript(newlist, i);
-                if (newobject == NULL) {
-                    return -1;
-                }
-                if (!PyList_Check(newobject)) {
-                    PyErr_Format(PyExc_TypeError,
-                                 "'%.200s' object is not a list object",
-                                 Py_TYPE(newobject)->tp_name);
-                    return -1;
-                }
+            newobject = list_subscript(newlist, i);
+            if (newobject == NULL) {
+                return -1;
             }
-            else {
+            if (!PyList_Check(newobject)) {
                 PyErr_Format(PyExc_TypeError,
-                             "list indices must be integers or slices, not %.200s",
-                             Py_TYPE(i)->tp_name);
+                             "'%.200s' object is not a list object",
+                             Py_TYPE(newobject)->tp_name);
                 return -1;
             }
             newlist = _PyList_CAST(newobject);
